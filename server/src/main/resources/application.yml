@@ -13,7 +13,7 @@ spring:
 ---
 spring:
   profiles:
-    active: dev
+    active: prod
 
 ---
 spring:
@@ -37,9 +37,9 @@ spring:
 spring:
   sql:
     init:
-      mode: never
+      mode: always
   datasource:
-    url: jdbc:postgresql://localhost:5432/hr
+    url: jdbc:postgresql://localhost:5432/online-bank
     username: postgres
     password: postgres
   jpa:
@@ -49,7 +49,7 @@ spring:
     properties:
       hibernate:
         generate_statistics: true
-    show-sql: false
+    show-sql: true
   config:
     activate:
       on-profile: prod

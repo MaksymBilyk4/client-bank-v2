@@ -2,6 +2,7 @@ package com.clientbank.max.services;
 
 import com.clientbank.max.dao.AccountDao;
 import com.clientbank.max.entities.Account;
+import com.clientbank.max.entities.Customer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -49,5 +50,21 @@ public class AccountService implements I_Service<Account> {
     @Override
     public boolean deleteById(Long id) {
         return accountDao.deleteById(id);
+    }
+
+    public Customer createAccount(Long customerId, Account account) {
+        return accountDao.createAccount(customerId, account);
+    }
+
+    public boolean toUpAccount (String number, Double amount) {
+        return accountDao.toUpAccount(number, amount);
+    }
+
+    public boolean withdrawMoney (String number, Double amount) {
+        return accountDao.withdrawMoney(number, amount);
+    }
+
+    public boolean transferMoney (String from, String to, Double amount) {
+        return accountDao.transferMoney(from, to, amount);
     }
 }

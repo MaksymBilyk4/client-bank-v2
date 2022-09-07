@@ -1,4 +1,5 @@
-DROP TABLE IF EXISTS accounts;
+DROP TABLE IF EXISTS employers, accounts, customers;
+
 CREATE TABLE public.accounts (
                                id INT AUTO_INCREMENT  PRIMARY KEY,
                                number VARCHAR(250) NOT NULL,
@@ -7,7 +8,6 @@ CREATE TABLE public.accounts (
                                customer_id INT
 );
 
-DROP TABLE IF EXISTS customers;
 CREATE TABLE public.customers (
                                  id INT AUTO_INCREMENT  PRIMARY KEY,
                                  name VARCHAR(250) NOT NULL,
@@ -17,7 +17,6 @@ CREATE TABLE public.customers (
                                  account_id INT
 );
 
-DROP TABLE IF EXISTS employers;
 CREATE TABLE public.employers (
                                   id INT AUTO_INCREMENT  PRIMARY KEY,
                                   name VARCHAR(250) NOT NULL,

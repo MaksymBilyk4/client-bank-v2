@@ -24,14 +24,28 @@ public class AccountController {
         return accountService.getOne(id);
     }
 
-    @PostMapping
-    public Account save(@RequestBody Account account) {
-        return accountService.save(account);
+    @PutMapping("/transfer")
+    public boolean transferMoney(
+            @RequestParam(value = "fromNumber") String fromNumber,
+            @RequestParam(value = "toNumber") String toNumber,
+            @RequestParam(value = "amount") Double amount
+    ) {
+        return accountService.transferMoney(fromNumber, toNumber, amount);
     }
 
-    @DeleteMapping("/{id}")
-    public boolean deleteById(@PathVariable(name = "id") Long id) {
-        return accountService.deleteById(id);
+    @PutMapping("/withdraw")
+    public boolean withdrawMoney(
+            @RequestParam(value = "number") String number,
+            @RequestParam(value = "amount") Double amount
+    ) {
+        return accountService.withdrawMoney(number, amount);
     }
 
+    @PutMapping("/up")
+    public boolean upMoney(
+            @RequestParam(value = "number") String number,
+            @RequestParam(value = "amount") Double amount
+    ) {
+        return accountService.toUpAccount(number, amount);
+    }
 }

@@ -1,6 +1,7 @@
 package com.clientbank.max.resources;
 
 import com.clientbank.max.entities.Customer;
+import com.clientbank.max.services.AccountService;
 import com.clientbank.max.services.CustomerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +14,7 @@ import java.util.List;
 public class CustomerController {
 
     private final CustomerService customerService;
+    private final AccountService accountService;
 
     @GetMapping
     public List<Customer> findAll () {
@@ -33,4 +35,11 @@ public class CustomerController {
     public boolean deleteById (@PathVariable (name = "id") Long id) {
         return customerService.deleteById(id);
     }
+
+    @PutMapping("/{id}")
+    public Customer update (@RequestBody Customer customer) {
+        return customerService.update(customer);
+    }
+
+
 }

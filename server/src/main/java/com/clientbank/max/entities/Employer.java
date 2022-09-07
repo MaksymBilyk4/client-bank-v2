@@ -5,10 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ManyToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.Set;
 
 @Entity
@@ -22,5 +19,6 @@ public class Employer extends AbstractEntity {
     private String address;
 
 //    @ManyToMany(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "customer_id")
 //    private Set<Customer> customers;
 }

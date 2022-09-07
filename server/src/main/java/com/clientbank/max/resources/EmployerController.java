@@ -14,7 +14,6 @@ public class EmployerController {
 
     private final EmployerService employerService;
 
-
     @GetMapping
     public List<Employer> findAll() {
         return employerService.findAll();

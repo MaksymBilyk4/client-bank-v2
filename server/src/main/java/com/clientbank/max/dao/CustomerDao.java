@@ -3,6 +3,7 @@ package com.clientbank.max.dao;
 import com.clientbank.max.entities.Customer;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.HibernateException;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -18,9 +19,10 @@ public class CustomerDao implements Dao<Customer> {
     private EntityManagerFactory entityManagerFactory;
 
     @Override
+//    @EntityGraph("customersFull")
     public List<Customer> findAll() {
         EntityManager entityManager = entityManagerFactory.createEntityManager();
-        List<Customer> customers = entityManager.createQuery("FROM Customer c").getResultList();
+        List<Customer> customers = entityManager.createQuery("SELECT c FROM Customer c").getResultList();
         entityManager.close();
         return customers;
     }
@@ -134,4 +136,24 @@ public class CustomerDao implements Dao<Customer> {
         }
     }
 
+    public Customer update (Customer customer) {
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        Customer updCustomer = entityManager.find(Customer.class, customer.getId());
+        try {
+            entityManager.getTransaction().begin();
+            updCustomer.setName(customer.getName());
+            updCustomer.setEmail(customer.getEmail());
+            updCustomer.setAge(customer.getAge());
+            updCustomer.setAccounts(customer.getAccounts());
+            entityManager.merge(updCustomer);
+            entityManager.getTransaction().commit();
+            return updCustomer;
+        }catch (HibernateException he) {
+            entityManager.getTransaction().rollback();
+            log.error("Can`t update customer with id = {} ", customer.getId(), he);
+            return null;
+        } finally {
+            entityManager.close();
+        }
+    }
 }

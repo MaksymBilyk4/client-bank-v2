@@ -49,4 +49,8 @@ public class CustomerService implements I_Service<Customer> {
     public boolean deleteById(Long id) {
         return customerDao.deleteById(id);
     }
+
+    public Customer update (Customer customer) {
+        return customerDao.update(customer);
+    }
 }
