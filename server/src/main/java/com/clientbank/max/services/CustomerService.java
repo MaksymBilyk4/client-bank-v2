@@ -4,8 +4,9 @@ import com.clientbank.max.dao.CustomerDao;
 import com.clientbank.max.entities.Customer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
+
 import java.util.List;
 
 @Transactional
@@ -16,11 +17,13 @@ public class CustomerService implements I_Service<Customer> {
     private final CustomerDao customerDao;
 
     @Override
+    @Transactional(readOnly = true)
     public List<Customer> findAll() {
         return customerDao.findAll();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Customer getOne(Long id) {
         return customerDao.getOne(id);
     }

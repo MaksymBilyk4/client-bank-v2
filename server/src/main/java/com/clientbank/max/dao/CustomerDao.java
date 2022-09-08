@@ -3,14 +3,12 @@ package com.clientbank.max.dao;
 import com.clientbank.max.entities.Customer;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.HibernateException;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.PersistenceUnit;
-import javax.persistence.Query;
+import javax.persistence.*;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Repository
@@ -19,10 +17,12 @@ public class CustomerDao implements Dao<Customer> {
     private EntityManagerFactory entityManagerFactory;
 
     @Override
-//    @EntityGraph("customersFull")
     public List<Customer> findAll() {
         EntityManager entityManager = entityManagerFactory.createEntityManager();
-        List<Customer> customers = entityManager.createQuery("SELECT c FROM Customer c").getResultList();
+        EntityGraph entityGraph = entityManager.getEntityGraph("customer_entity_graph");
+        List<Customer> customers = entityManager.createQuery("SELECT c FROM Customer c")
+                .setHint("javax.persistence.fetchgraph", entityGraph)
+                .getResultList();
         entityManager.close();
         return customers;
     }
@@ -30,9 +30,11 @@ public class CustomerDao implements Dao<Customer> {
     @Override
     public Customer getOne(Long id) {
         EntityManager entityManager = entityManagerFactory.createEntityManager();
-
         try{
-            return entityManager.find(Customer.class, id);
+            EntityGraph entityGraph = entityManager.getEntityGraph("customer_entity_graph");
+            Map<String, Object> properties = new HashMap<>();
+            properties.put("javax.persistence.fetchgraph", entityGraph);
+            return entityManager.find(Customer.class, id, properties);
         }catch (HibernateException he) {
             entityManager.getTransaction().rollback();
             log.error("Can`t get customer with id = {} ", id, he);

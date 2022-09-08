@@ -1,6 +1,7 @@
 package com.clientbank.max.entities;
 
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
@@ -8,7 +9,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.jpa.repository.EntityGraph;
 
 import javax.persistence.*;
 import java.util.LinkedHashSet;
@@ -20,32 +20,24 @@ import java.util.Set;
 @Getter
 @Setter
 @Table(name = "customers")
-//@NamedEntityGraph(
-//        name = "customersFull",
-//        attributeNodes = {
-//                @NamedAttributeNode(value = "accounts", subgraph = "account")
-//        },
-//        subgraphs = {
-//                @NamedSubgraph(name = "account",
-//                    attributeNodes = {
-//                        @NamedAttributeNode(value = "customer")
-//                    }
-//                )
-//        }
-//)
+@NamedEntityGraph(
+        name = "customer_entity_graph",
+        attributeNodes = {
+                @NamedAttributeNode("accounts")
+        }
+)
 @Entity
-public class Customer extends AbstractEntity{
+public class Customer extends AbstractEntity {
     private String name;
     private String email;
     private Integer age;
 
-//    @ManyToMany(fetch = FetchType.EAGER)
+    //    @ManyToMany(fetch = FetchType.EAGER)
 //    private Set<Employer> employers;
-    @OneToMany(mappedBy = "customer", fetch = FetchType.EAGER,cascade = CascadeType.REMOVE)
-//    @JsonIdentityInfo(
-//            generator = ObjectIdGenerators.PropertyGenerator.class,
-//            property = "id"
-//    )
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.REMOVE)
+    @JsonIdentityInfo(
+            generator = ObjectIdGenerators.PropertyGenerator.class,
+            property = "id")
     private Set<Account> accounts = new LinkedHashSet<>();
 
     @Override
@@ -69,7 +61,7 @@ public class Customer extends AbstractEntity{
                 ", email='" + email + '\'' +
                 ", age=" + age +
 //                ", employers=" + employers +
-                ", accounts=" + accounts.toString() +
+                ", accounts=" + accounts +
                 '}';
     }
 

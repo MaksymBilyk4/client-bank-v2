@@ -5,8 +5,8 @@ import com.clientbank.max.entities.Account;
 import com.clientbank.max.entities.Customer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 import java.util.List;
 
 @Transactional
@@ -18,11 +18,13 @@ public class AccountService implements I_Service<Account> {
 
 
     @Override
+    @Transactional(readOnly = true)
     public List<Account> findAll() {
         return accountDao.findAll();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Account getOne(Long id) {
         return accountDao.getOne(id);
     }
@@ -54,6 +56,10 @@ public class AccountService implements I_Service<Account> {
 
     public Customer createAccount(Long customerId, Account account) {
         return accountDao.createAccount(customerId, account);
+    }
+
+    public boolean deleteAccount (String number, Long id) {
+        return accountDao.deleteAccount(number, id);
     }
 
     public boolean toUpAccount (String number, Double amount) {

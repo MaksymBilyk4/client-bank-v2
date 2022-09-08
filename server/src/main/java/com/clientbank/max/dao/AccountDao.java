@@ -6,11 +6,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.hibernate.HibernateException;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.PersistenceUnit;
-import javax.persistence.Query;
+import javax.persistence.*;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
@@ -22,7 +21,10 @@ public class AccountDao implements Dao<Account> {
     @Override
     public List<Account> findAll() {
         EntityManager entityManager = entityManagerFactory.createEntityManager();
-        List<Account> accounts = entityManager.createQuery("SELECT a FROM Account a").getResultList();
+        EntityGraph entityGraph = entityManager.getEntityGraph("account_entity_graph");
+        List<Account> accounts = entityManager.createQuery("SELECT a FROM Account a")
+                .setHint("javax.persistence.fetchgraph", entityGraph)
+                .getResultList();
         entityManager.close();
         return accounts;
     }
@@ -32,7 +34,10 @@ public class AccountDao implements Dao<Account> {
         EntityManager entityManager = entityManagerFactory.createEntityManager();
 
         try {
-            return entityManager.find(Account.class, id);
+            EntityGraph entityGraph = entityManager.getEntityGraph("account_entity_graph");
+            Map<String, Object> properties = new HashMap<>();
+            properties.put("javax.persistence.fetchgraph", entityGraph);
+            return entityManager.find(Account.class, id, properties);
         } catch (HibernateException he) {
             log.error("Can`t get account with id = {} ", id, he);
             return null;
@@ -139,18 +144,16 @@ public class AccountDao implements Dao<Account> {
     public Customer createAccount(Long customerId, Account account) {
         EntityManager entityManager = entityManagerFactory.createEntityManager();
         Customer accOwner = entityManager.find(Customer.class, customerId);
+        account.setNumber(UUID.randomUUID().toString());
+        account.setCustomer(accOwner);
 
         try {
             entityManager.getTransaction().begin();
-            accOwner.getAccounts().add(
-                    new Account(
-                            account.getCurrency(),
-                            account.getBalance(),
-                            accOwner)
-            );
+            accOwner.getAccounts().add(account);
             entityManager.merge(account);
             entityManager.getTransaction().commit();
             entityManager.close();
+
             return accOwner;
         } catch (HibernateException he) {
             entityManager.getTransaction().rollback();
@@ -158,6 +161,32 @@ public class AccountDao implements Dao<Account> {
             return null;
         } finally {
             entityManager.close();
+        }
+    }
+
+    public boolean deleteAccount(String number, Long id) {
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        Customer customer = entityManager.find(Customer.class, id);
+        Account account = null;
+
+        try {
+            for (Account a : customer.getAccounts()) {
+                if (a.getNumber().equals(number)) {
+                    account = a;
+                }
+            }
+            customer.getAccounts().remove(account);
+
+            entityManager.getTransaction().begin();
+            entityManager.remove(account);
+            entityManager.getTransaction().commit();
+            entityManager.close();
+
+            return true;
+        } catch (HibernateException he) {
+            entityManager.getTransaction().rollback();
+            log.error("Can`t remove account with number = {} ", number, he);
+            return false;
         }
     }
 
@@ -207,7 +236,7 @@ public class AccountDao implements Dao<Account> {
         }
     }
 
-    public boolean transferMoney (String from, String to, Double amount) {
+    public boolean transferMoney(String from, String to, Double amount) {
         EntityManager entityManager = entityManagerFactory.createEntityManager();
         Query fromQuery = entityManager.createQuery("SELECT a FROM Account a WHERE a.number = :number")
                 .setParameter("number", from);
@@ -227,8 +256,9 @@ public class AccountDao implements Dao<Account> {
                 entityManager.getTransaction().commit();
                 entityManager.close();
                 return true;
-            } else throw new IllegalArgumentException("Account with number " + from + " has not enough money on your bank account");
-        }catch (HibernateException he) {
+            } else
+                throw new IllegalArgumentException("Account with number " + from + " has not enough money on your bank account");
+        } catch (HibernateException he) {
             entityManager.getTransaction().rollback();
             log.error("Can`t transfer money from = {}, to = {}", from, to, he);
             return false;
