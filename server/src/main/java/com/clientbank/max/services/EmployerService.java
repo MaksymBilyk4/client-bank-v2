@@ -4,8 +4,8 @@ import com.clientbank.max.dao.EmployerDao;
 import com.clientbank.max.entities.Employer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 import java.util.List;
 
 @Service
@@ -16,11 +16,13 @@ public class EmployerService implements I_Service<Employer>{
     private final EmployerDao employerDao;
 
     @Override
+    @Transactional(readOnly = true)
     public List<Employer> findAll() {
         return employerDao.findAll();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Employer getOne(Long id) {
         return employerDao.getOne(id);
     }

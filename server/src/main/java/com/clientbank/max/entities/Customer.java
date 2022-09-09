@@ -23,7 +23,13 @@ import java.util.Set;
 @NamedEntityGraph(
         name = "customer_entity_graph",
         attributeNodes = {
-                @NamedAttributeNode("accounts")
+                @NamedAttributeNode("accounts"),
+                @NamedAttributeNode(value = "employers", subgraph = "customerInEmployer")
+        },
+        subgraphs = {
+                @NamedSubgraph(name = "customerInEmployer", attributeNodes = {
+                    @NamedAttributeNode(value = "customers")
+                })
         }
 )
 @Entity
@@ -32,8 +38,14 @@ public class Customer extends AbstractEntity {
     private String email;
     private Integer age;
 
-    //    @ManyToMany(fetch = FetchType.EAGER)
-//    private Set<Employer> employers;
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "customers_employers",
+            joinColumns = @JoinColumn(name = "customer_id"),
+            inverseJoinColumns = @JoinColumn(name = "employer_id")
+    )
+    private Set<Employer> employers;
+
     @OneToMany(mappedBy = "customer", cascade = CascadeType.REMOVE)
     @JsonIdentityInfo(
             generator = ObjectIdGenerators.PropertyGenerator.class,
@@ -60,7 +72,7 @@ public class Customer extends AbstractEntity {
                 ", name='" + name + '\'' +
                 ", email='" + email + '\'' +
                 ", age=" + age +
-//                ", employers=" + employers +
+                ", employers=" + employers +
                 ", accounts=" + accounts +
                 '}';
     }

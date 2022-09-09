@@ -20,12 +20,16 @@ import java.util.UUID;
 @NamedEntityGraph(
         name = "account_entity_graph",
         attributeNodes = {
-                @NamedAttributeNode(value = "customer", subgraph = "customerInAccount")
+                @NamedAttributeNode(value = "customer", subgraph = "customerInAccount"),
         },
         subgraphs = {
                 @NamedSubgraph(name = "customerInAccount", attributeNodes = {
-                        @NamedAttributeNode(value = "accounts")
-                })
+                        @NamedAttributeNode(value = "accounts"),
+                        @NamedAttributeNode(value = "employers", subgraph = "customerInEmployer")
+                }),
+                @NamedSubgraph(name = "customerInEmployer", attributeNodes = {
+                        @NamedAttributeNode(value = "customers")
+                }),
         }
 )
 @Table(name = "accounts")
@@ -40,15 +44,8 @@ public class Account extends AbstractEntity {
     @JsonIdentityInfo(
             generator = ObjectIdGenerators.PropertyGenerator.class,
             property = "id")
-//    @JsonIgnore
     private Customer customer;
 
-//    public Account(String number, Currency currency, Double balance, Customer customer) {
-//        this.number = number;
-//        this.currency = currency;
-//        this.balance = balance;
-//        this.customer = customer;
-//    }
 
     @Override
     public String toString() {

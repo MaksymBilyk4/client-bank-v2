@@ -5,11 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.hibernate.HibernateException;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.PersistenceUnit;
-import javax.persistence.Query;
+import javax.persistence.*;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Repository
@@ -20,7 +19,10 @@ public class EmployerDao implements Dao<Employer> {
     @Override
     public List<Employer> findAll() {
         EntityManager entityManager = entityManagerFactory.createEntityManager();
-        List<Employer> employers = entityManager.createQuery("FROM Employer e").getResultList();
+        EntityGraph entityGraph = entityManager.getEntityGraph("employer_entity_graph");
+        List<Employer> employers = entityManager.createQuery("SELECT e FROM Employer e")
+                .setHint("javax.persistence.fetchgraph", entityGraph)
+                .getResultList();
         entityManager.close();
         return employers;
     }
@@ -30,7 +32,13 @@ public class EmployerDao implements Dao<Employer> {
         EntityManager entityManager = entityManagerFactory.createEntityManager();
 
         try {
-            return entityManager.find(Employer.class, id);
+            EntityGraph entityGraph = entityManager.getEntityGraph("employer_entity_graph");
+            Employer employer = (Employer) entityManager.createQuery("SELECT e FROM Employer e WHERE e.id = :id")
+                    .setParameter("id", id)
+                    .setHint("javax.persistence.fetchgraph", entityGraph)
+                    .getSingleResult();
+            return employer;
+
         } catch (HibernateException he) {
             log.error("Can`t get employer with id = {} ", id, he);
             return null;

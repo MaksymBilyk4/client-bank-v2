@@ -140,7 +140,12 @@ public class CustomerDao implements Dao<Customer> {
 
     public Customer update (Customer customer) {
         EntityManager entityManager = entityManagerFactory.createEntityManager();
-        Customer updCustomer = entityManager.find(Customer.class, customer.getId());
+        EntityGraph entityGraph = entityManager.getEntityGraph("customer_entity_graph");
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("javax.persistence.fetchgraph", entityGraph);
+
+        Customer updCustomer = entityManager.find(Customer.class, customer.getId(), properties);
+
         try {
             entityManager.getTransaction().begin();
             updCustomer.setName(customer.getName());
