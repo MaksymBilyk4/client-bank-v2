@@ -47,9 +47,9 @@ public class Customer extends AbstractEntity {
     private Set<Employer> employers;
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.REMOVE)
-    @JsonIdentityInfo(
-            generator = ObjectIdGenerators.PropertyGenerator.class,
-            property = "id")
+//    @JsonIdentityInfo(
+//            generator = ObjectIdGenerators.PropertyGenerator.class,
+//            property = "id")
     private Set<Account> accounts = new LinkedHashSet<>();
 
     @Override

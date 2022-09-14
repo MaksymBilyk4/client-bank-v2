@@ -57,4 +57,12 @@ public class CustomerController {
     ) {
         return accountService.deleteAccount(number, customerId);
     }
+
+    @PostMapping("{customerId}/employer/{employerId}")
+    public boolean addEmployer (
+            @PathVariable (name = "customerId") Long customerId,
+            @PathVariable (name = "employerId") Long employerId
+    ) {
+        return customerService.addEmployer(customerId, employerId);
+    }
 }

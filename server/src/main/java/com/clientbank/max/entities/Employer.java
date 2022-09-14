@@ -31,7 +31,7 @@ import java.util.Set;
                 }),
                 @NamedSubgraph(name = "reverse", attributeNodes = {
                         @NamedAttributeNode(value = "customers"),
-                })
+                }),
         }
 )
 public class Employer extends AbstractEntity {

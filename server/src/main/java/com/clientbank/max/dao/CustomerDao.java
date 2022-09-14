@@ -1,6 +1,7 @@
 package com.clientbank.max.dao;
 
 import com.clientbank.max.entities.Customer;
+import com.clientbank.max.entities.Employer;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.HibernateException;
 import org.springframework.stereotype.Repository;
@@ -30,12 +31,12 @@ public class CustomerDao implements Dao<Customer> {
     @Override
     public Customer getOne(Long id) {
         EntityManager entityManager = entityManagerFactory.createEntityManager();
-        try{
+        try {
             EntityGraph entityGraph = entityManager.getEntityGraph("customer_entity_graph");
             Map<String, Object> properties = new HashMap<>();
             properties.put("javax.persistence.fetchgraph", entityGraph);
             return entityManager.find(Customer.class, id, properties);
-        }catch (HibernateException he) {
+        } catch (HibernateException he) {
             entityManager.getTransaction().rollback();
             log.error("Can`t get customer with id = {} ", id, he);
             return null;
@@ -50,7 +51,7 @@ public class CustomerDao implements Dao<Customer> {
     public Customer save(Customer customer) {
         EntityManager entityManager = entityManagerFactory.createEntityManager();
 
-        try{
+        try {
             entityManager.getTransaction().begin();
             entityManager.persist(customer);
             entityManager.getTransaction().commit();
@@ -103,13 +104,13 @@ public class CustomerDao implements Dao<Customer> {
     public boolean delete(Customer customer) {
         EntityManager entityManager = entityManagerFactory.createEntityManager();
 
-        try{
+        try {
             entityManager.getTransaction().begin();
             entityManager.remove(customer);
             entityManager.getTransaction().commit();
             entityManager.close();
             return true;
-        }catch (HibernateException he) {
+        } catch (HibernateException he) {
             entityManager.getTransaction().rollback();
             log.error("Can`t remove customer: ", he);
             return false;
@@ -131,14 +132,14 @@ public class CustomerDao implements Dao<Customer> {
             entityManager.getTransaction().commit();
             entityManager.close();
             return true;
-        }catch (HibernateException he) {
+        } catch (HibernateException he) {
             entityManager.getTransaction().rollback();
             log.error("Can`t remove customer with id = {} ", id, he);
             return false;
         }
     }
 
-    public Customer update (Customer customer) {
+    public Customer update(Customer customer) {
         EntityManager entityManager = entityManagerFactory.createEntityManager();
         EntityGraph entityGraph = entityManager.getEntityGraph("customer_entity_graph");
         Map<String, Object> properties = new HashMap<>();
@@ -155,10 +156,40 @@ public class CustomerDao implements Dao<Customer> {
             entityManager.merge(updCustomer);
             entityManager.getTransaction().commit();
             return updCustomer;
-        }catch (HibernateException he) {
+        } catch (HibernateException he) {
             entityManager.getTransaction().rollback();
             log.error("Can`t update customer with id = {} ", customer.getId(), he);
             return null;
+        } finally {
+            entityManager.close();
+        }
+    }
+
+    public boolean addEmployer(Long customerId, Long employerId) {
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+
+
+//        EntityGraph customerEntityGraph = entityManager.getEntityGraph("customer_entity_graph");
+//        Map<String, Object> customerProperties = new HashMap<>();
+//        customerProperties.put("javax.persistence.fetchgraph", customerEntityGraph);
+        Customer customer = entityManager.find(Customer.class, customerId);
+
+//        EntityGraph employerEntityGraph = entityManager.getEntityGraph("employer_entity_graph");
+//        Map<String, Object> employerProperties = new HashMap<>();
+//        customerProperties.put("javax.persistence.fetchgraph", employerEntityGraph);
+        Employer employer = entityManager.find(Employer.class, employerId);
+
+        try {
+            entityManager.getTransaction().begin();
+            customer.getEmployers().add(employer);
+            entityManager.merge(customer);
+            entityManager.getTransaction().commit();
+            entityManager.close();
+            return true;
+        } catch (HibernateException he) {
+            entityManager.getTransaction().rollback();
+            log.error("Can`t add employer with id = {} to customer with id = {}", employerId, customerId, he);
+            return false;
         } finally {
             entityManager.close();
         }

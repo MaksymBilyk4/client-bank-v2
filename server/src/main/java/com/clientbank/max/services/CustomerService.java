@@ -56,4 +56,8 @@ public class CustomerService implements I_Service<Customer> {
     public Customer update (Customer customer) {
         return customerDao.update(customer);
     }
+
+    public boolean addEmployer (Long customerId, Long employerId) {
+        return customerDao.addEmployer(customerId, employerId);
+    }
 }

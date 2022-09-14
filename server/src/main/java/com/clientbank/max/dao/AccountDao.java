@@ -7,6 +7,7 @@ import org.hibernate.HibernateException;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.*;
+import javax.swing.text.html.parser.Entity;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -143,7 +144,10 @@ public class AccountDao implements Dao<Account> {
 
     public Customer createAccount(Long customerId, Account account) {
         EntityManager entityManager = entityManagerFactory.createEntityManager();
-        Customer accOwner = entityManager.find(Customer.class, customerId);
+        EntityGraph entityGraph = entityManager.createEntityGraph("customer_entity_graph");
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("javax.persistence.fetchgraph", entityGraph);
+        Customer accOwner = entityManager.find(Customer.class, customerId, properties);
         account.setNumber(UUID.randomUUID().toString());
         account.setCustomer(accOwner);
 
